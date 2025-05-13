@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  influxdb:
+    image: influxdb:2.7
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "influx", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    env_file:
+      - .env
+    volumes:
+      - ../DoModelTraining/models:/app/models
+
+volumes:
+  influxdb-data:
